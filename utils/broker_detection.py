@@ -17,8 +17,9 @@ BROKER_PATTERNS = {
         r"MODALMAIS"
     ],
 
-    "easynvest": [
+    "nuinvest": [
         r"EASYNVEST",
+        r"NuInvest",
         r"NU\s+INVEST"
     ],
 
