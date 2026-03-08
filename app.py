@@ -12,7 +12,7 @@ uploaded = st.file_uploader(
     accept_multiple_files=True
 )
 
-if uploaded:
+if uploaded and st.button("Processar"):
 
     progress = st.progress(0)
     status = st.empty()
