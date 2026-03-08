@@ -19,7 +19,9 @@ BROKER_PATTERNS = {
 
     "nuinvest": [
         r"EASYNVEST",
-        r"NuInvest",
+        r"NUINVEST",
+        r"NU INVEST",
+        r"NUBANK",
         r"NU\s+INVEST"
     ],
 
