@@ -16,9 +16,10 @@ def process_notes(files, progress_callback=None, status_callback=None):
 
         text = extract_text(f)
 
+    if status_callback:
         status_callback("Primeiras linhas do PDF:")
-
-        for l in text.split("\n")[:20]:
+    for l in text.split("\n")[:20]:
+        if status_callback:
             status_callback(l)
             
         print("DEBUG TEXT SAMPLE:")
