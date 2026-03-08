@@ -8,28 +8,20 @@ from utils.broker_detection import detect_broker
 
 def process_notes(files, progress_callback=None, status_callback=None):
 
-    results = []
+    parser = B3Parser()
+
+    all_results = []
 
     total = len(files)
 
-    for i,f in enumerate(files):
+    for i, f in enumerate(files):
 
         text = extract_text(f)
 
-    if status_callback:
-        status_callback("Primeiras linhas do PDF:")
-    for l in text.split("\n")[:20]:
-        if status_callback:
-            status_callback(l)
-            
-        print("DEBUG TEXT SAMPLE:")
-        print(text[:2000])
         broker = detect_broker(text)
 
         if status_callback:
             status_callback(f"{f} | corretora detectada: {broker}")
-
-        parser = B3Parser()
 
         note = parser.parse_from_text(text)
 
@@ -38,9 +30,12 @@ def process_notes(files, progress_callback=None, status_callback=None):
         df["date"] = note.date
         df["broker"] = broker
 
-        results.append(df)
+        all_results.append(df)
 
         if progress_callback:
-            progress_callback((i+1)/total)
+            progress_callback((i + 1) / total)
 
-    return pd.concat(results)
+    if len(all_results) == 0:
+        return pd.DataFrame()
+
+    return pd.concat(all_results, ignore_index=True)
