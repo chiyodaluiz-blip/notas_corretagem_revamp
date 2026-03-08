@@ -16,6 +16,11 @@ def process_notes(files, progress_callback=None, status_callback=None):
 
         text = extract_text(f)
 
+        status_callback("Primeiras linhas do PDF:")
+
+        for l in text.split("\n")[:20]:
+            status_callback(l)
+            
         print("DEBUG TEXT SAMPLE:")
         print(text[:2000])
         broker = detect_broker(text)
