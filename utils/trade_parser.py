@@ -1,64 +1,35 @@
-import re
+def parse_number(x):
 
-TICKER_REGEX = r"[A-Z]{4}\d{1,2}"
+    x = x.replace(".", "")
+    x = x.replace(",", ".")
 
-
-def parse_number(token):
-
-    token = token.strip()
-    token = token.replace(".", "")
-    token = token.replace(",", ".")
-
-    return float(token)
-
-
-def is_number(token):
-
-    try:
-        parse_number(token)
-        return True
-    except:
-        return False
+    return float(x)
 
 
 def parse_trade_line(line):
 
+    if not line.startswith("BOVESPA"):
+        return None
+
     tokens = line.split()
 
-    ticker = None
-    side = None
-    qty = None
-    price = None
+    if len(tokens) < 8:
+        return None
 
-    for t in tokens:
-        if re.match(TICKER_REGEX, t):
-            ticker = t
-            break
+    try:
 
-    for t in tokens:
-        if t in ["C", "V"]:
-            side = t
-            break
+        side = tokens[1]
+        asset = tokens[3]
 
-    numbers = []
-
-    for t in tokens:
-
-        if is_number(t):
-            numbers.append(t)
-
-    if len(numbers) >= 2:
-
-        qty = parse_number(numbers[0])
-        price = parse_number(numbers[-1])
-
-    if ticker and side and qty and price:
+        qty = parse_number(tokens[5])
+        price = parse_number(tokens[6])
 
         return {
-            "asset": ticker,
+            "asset": asset,
             "side": side,
             "qty": qty,
             "price": price
         }
 
-    return None
+    except:
+        return None
