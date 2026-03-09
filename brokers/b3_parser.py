@@ -126,10 +126,10 @@ class B3Parser:
 
 
     def extract_date(self, text):
-
+    
         m = re.search(DATE_REGEX, text)
-
+    
         if m:
             return datetime.strptime(m.group(1), "%d/%m/%Y")
-
+    
         return None
