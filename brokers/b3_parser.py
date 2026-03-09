@@ -171,9 +171,18 @@ class B3Parser:
     
     def extract_liquido(self, text):
     
-        m = re.search(LIQUIDO_REGEX, text)
+        for line in text.split("\n"):
     
-        if m:
-            return parse_number(m.group(1))
+            if "Líquido para" in line or "Liquido para" in line:
+    
+                parts = line.strip().split()
+    
+                # pegar último token da linha
+                val = parts[-1]
+    
+                try:
+                    return parse_number(val)
+                except:
+                    pass
     
         return None
