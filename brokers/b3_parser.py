@@ -159,21 +159,21 @@ class B3Parser:
     
         return None
 
-def extract_irrf(self, text):
-
-    m = re.search(IRRF_REGEX, text)
-
-    if m:
-        return abs(parse_number(m.group(1)))
-
-    return 0
+    def extract_irrf(self, text):
     
-
-def extract_liquido(self, text):
-
-    m = re.search(LIQUIDO_REGEX, text)
-
-    if m:
-        return parse_number(m.group(1))
-
-    return None
+        m = re.search(IRRF_REGEX, text)
+    
+        if m:
+            return abs(parse_number(m.group(1)))
+    
+        return 0
+        
+    
+    def extract_liquido(self, text):
+    
+        m = re.search(LIQUIDO_REGEX, text)
+    
+        if m:
+            return parse_number(m.group(1))
+    
+        return None
