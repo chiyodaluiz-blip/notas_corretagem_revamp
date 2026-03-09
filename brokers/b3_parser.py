@@ -174,7 +174,9 @@ class B3Parser:
         import re
     
         for line in text.split("\n"):
-    
+            
+            if "Líqu" in l:
+                print("DEBUG:", l)
             if "Líqu" in line:
     
                 nums = re.findall(r"-?\d+[\.,]\d+", line)
