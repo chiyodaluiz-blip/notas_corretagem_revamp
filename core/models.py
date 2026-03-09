@@ -28,3 +28,4 @@ class BrokerageNote:
     date: datetime
     trades: list
     taxes: Taxes
+    liquido_para: float | None = None
