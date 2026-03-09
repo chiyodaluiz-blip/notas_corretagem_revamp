@@ -159,3 +159,12 @@ def extract_irrf(self, text):
 
     return 0
     
+
+def extract_liquido(self, text):
+
+    m = re.search(LIQUIDO_REGEX, text)
+
+    if m:
+        return parse_number(m.group(1))
+
+    return None
