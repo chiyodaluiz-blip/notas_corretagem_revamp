@@ -1,4 +1,4 @@
-DATE_REGEX = r"(\d{2}/\d{2}/\d{4})"
+DATE_REGEX = r"Data Pregão\s+(\d{2}/\d{2}/\d{4})"
 
 TAX_REGEX = {
 
