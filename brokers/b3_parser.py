@@ -104,19 +104,25 @@ class B3Parser:
 
 
     def extract_taxes(self, text):
-
+    
         taxes = Taxes()
-
+    
+        # taxas padrão
         for name, pattern in TAX_REGEX.items():
-
+    
             m = re.search(pattern, text)
-
+    
             if m:
-
+    
                 val = abs(parse_number(m.group(1)))
-
+    
                 setattr(taxes, name, val)
-
+    
+        # IRRF sobre operações
+        irrf = self.extract_irrf(text)
+    
+        taxes.impostos = irrf
+    
         taxes.total = (
             taxes.liquidacao
             + taxes.registro
@@ -124,7 +130,7 @@ class B3Parser:
             + taxes.operacional
             + taxes.impostos
         )
-
+    
         return taxes
 
     
