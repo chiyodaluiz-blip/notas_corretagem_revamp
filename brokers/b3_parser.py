@@ -1,11 +1,18 @@
 import re
 from datetime import datetime
 
-from utils.pdf_text import extract_text
-from utils.trade_parser import parse_trade_line
-from utils.regex_patterns import DATE_REGEX, TAX_REGEX
+import pdfplumber
 
 from core.models import Trade, Taxes, BrokerageNote
+from utils.regex_patterns import DATE_REGEX, TAX_REGEX
+
+
+def parse_number(x):
+
+    x = x.replace(".", "")
+    x = x.replace(",", ".")
+
+    return float(x)
 
 
 class B3Parser:
@@ -13,50 +20,99 @@ class B3Parser:
 
     def parse(self, pdf_path):
 
-        text = extract_text(pdf_path)
+        with pdfplumber.open(pdf_path) as pdf:
 
-        return self.parse_from_text(text)
+            page = pdf.pages[0]
+
+            text = page.extract_text()
+
+            trades = self.extract_trades(text)
+
+            taxes = self.extract_taxes(text)
+
+            date = self.extract_date(text)
+
+        return BrokerageNote(
+            date=date,
+            trades=trades,
+            taxes=taxes
+        )
 
 
     def parse_from_text(self, text):
+
+        trades = self.extract_trades(text)
+
+        taxes = self.extract_taxes(text)
+
+        date = self.extract_date(text)
+
+        return BrokerageNote(
+            date=date,
+            trades=trades,
+            taxes=taxes
+        )
+
+
+    def extract_trades(self, text):
 
         trades = []
 
         for line in text.split("\n"):
 
-            parsed = parse_trade_line(line)
+            line = line.strip()
 
-            if parsed:
+            if not line.startswith("BOVESPA"):
+                continue
+
+            tokens = line.split()
+
+            if len(tokens) < 7:
+                continue
+
+            try:
+
+                side = tokens[1]
+                asset = tokens[3]
+
+                numbers = []
+
+                for t in tokens:
+
+                    try:
+                        numbers.append(parse_number(t))
+                    except:
+                        pass
+
+                if len(numbers) < 2:
+                    continue
+
+                qty = numbers[0]
+                price = numbers[1]
 
                 trades.append(
-                    Trade(
-                        parsed["asset"],
-                        parsed["side"],
-                        parsed["qty"],
-                        parsed["price"]
-                    )
+                    Trade(asset, side, qty, price)
                 )
 
-        # data da nota
-        date_match = re.search(DATE_REGEX, text)
+            except:
+                continue
 
-        date = None
+        return trades
 
-        if date_match:
-            date = datetime.strptime(date_match.group(1), "%d/%m/%Y")
 
-        # taxas
+    def extract_taxes(self, text):
+
         taxes = Taxes()
 
-        for name,pattern in TAX_REGEX.items():
+        for name, pattern in TAX_REGEX.items():
 
             m = re.search(pattern, text)
 
             if m:
 
-                val = float(m.group(1).replace(",", "."))
+                val = abs(parse_number(m.group(1)))
 
-                setattr(taxes,name,val)
+                setattr(taxes, name, val)
 
         taxes.total = (
             taxes.liquidacao
@@ -66,8 +122,14 @@ class B3Parser:
             + taxes.impostos
         )
 
-        return BrokerageNote(
-            date=date,
-            trades=trades,
-            taxes=taxes
-        )
+        return taxes
+
+
+    def extract_date(self, text):
+
+        m = re.search(DATE_REGEX, text)
+
+        if m:
+            return datetime.strptime(m.group(1), "%d/%m/%Y")
+
+        return None
