@@ -30,6 +30,35 @@ def process_notes(files, progress_callback=None, status_callback=None):
         df["date"] = note.date
         df["broker"] = broker
 
+        if status_callback:
+        
+            assets = sorted(df["asset"].unique())
+        
+            total_trades = len(df)
+        
+            total_valor = df["valor"].sum()
+        
+            total_fees = df["fees"].sum()
+        
+            status_callback(
+                f"""
+        📄 **Arquivo:** {f}
+        
+        📅 **Data:** {note.date}
+        
+        🏦 **Corretora:** {broker}
+        
+        📊 **Trades:** {total_trades}
+        
+        📈 **Ativos:** {", ".join(assets)}
+        
+        💰 **Valor bruto negociado:** R$ {total_valor:,.2f}
+        
+        🧾 **Total taxas:** R$ {total_fees:,.2f}
+        """
+            )
+
+        
         all_results.append(df)
 
         if progress_callback:
