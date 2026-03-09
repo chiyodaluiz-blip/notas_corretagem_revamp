@@ -1,7 +1,7 @@
 import pandas as pd
 
 from brokers.b3_parser import B3Parser
-from core.calculations import apply_pro_rata
+from core.calculations import apply_pro_rata, validate_note
 from utils.pdf_text import extract_text
 from utils.broker_detection import detect_broker
 
