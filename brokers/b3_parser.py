@@ -149,3 +149,13 @@ class B3Parser:
                     pass
     
         return None
+
+def extract_irrf(self, text):
+
+    m = re.search(IRRF_REGEX, text)
+
+    if m:
+        return abs(parse_number(m.group(1)))
+
+    return 0
+    
