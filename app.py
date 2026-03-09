@@ -7,7 +7,7 @@ from core.pipeline import process_notes
 
 
 st.set_page_config(
-    page_title="Processador de Notas B3",
+    page_title="Processador de Notas de Corretagem",
     layout="wide"
 )
 
