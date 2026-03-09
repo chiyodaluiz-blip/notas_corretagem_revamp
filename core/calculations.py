@@ -43,3 +43,13 @@ def apply_pro_rata(note):
     )
 
     return df
+
+def validate_note(df, note):
+
+    valor_calculado = df["valor_pago"].sum()
+
+    valor_nota = df["valor"].sum() + note.taxes.total
+
+    diff = abs(valor_calculado - valor_nota)
+
+    return diff
