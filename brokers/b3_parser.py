@@ -32,10 +32,13 @@ class B3Parser:
 
             date = self.extract_date(text)
 
+            liquido = self.extract_liquido(text)
+
         return BrokerageNote(
             date=date,
             trades=trades,
-            taxes=taxes
+            taxes=taxes,
+            liquido_para=liquido
         )
 
 
