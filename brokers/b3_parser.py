@@ -124,12 +124,28 @@ class B3Parser:
 
         return taxes
 
-
+    
     def extract_date(self, text):
     
-        m = re.search(DATE_REGEX, text)
+        # tentativa 1: regex simples
+        m = re.search(r"\d{2}/\d{2}/\d{4}", text)
     
         if m:
-            return datetime.strptime(m.group(1), "%d/%m/%Y")
+            try:
+                return datetime.strptime(m.group(0), "%d/%m/%Y")
+            except:
+                pass
+    
+        # tentativa 2: procurar após "Data Preg"
+        lines = text.split("\n")
+    
+        for i, line in enumerate(lines):
+    
+            if "Data Preg" in line and i + 1 < len(lines):
+    
+                try:
+                    return datetime.strptime(lines[i+1].strip(), "%d/%m/%Y")
+                except:
+                    pass
     
         return None
