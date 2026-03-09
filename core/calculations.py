@@ -4,12 +4,9 @@ import numpy as np
 
 def apply_pro_rata(note):
 
-    trades = note.trades
-    taxes = note.taxes
-
     rows = []
 
-    for t in trades:
+    for t in note.trades:
 
         rows.append({
             "asset": t.asset,
@@ -20,11 +17,16 @@ def apply_pro_rata(note):
 
     df = pd.DataFrame(rows)
 
-    df["valor"] = df.qty * df.price
+    if df.empty:
+        return df
 
-    total_valor = df.valor.sum()
+    df["valor"] = df["qty"] * df["price"]
 
-    ratio = df.valor / total_valor
+    total_valor = df["valor"].sum()
+
+    ratio = df["valor"] / total_valor
+
+    taxes = note.taxes
 
     df["tx_liq"] = taxes.liquidacao * ratio
     df["tx_reg"] = taxes.registro * ratio
@@ -35,9 +37,9 @@ def apply_pro_rata(note):
     df["fees"] = df[["tx_liq","tx_reg","emol","tx_op","impostos"]].sum(axis=1)
 
     df["valor_pago"] = np.where(
-        df.side == "C",
-        df.valor + df.fees,
-        df.valor - df.fees
+        df["side"] == "C",
+        df["valor"] + df["fees"],
+        df["valor"] - df["fees"]
     )
 
     return df
