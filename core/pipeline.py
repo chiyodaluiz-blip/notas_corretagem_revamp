@@ -30,6 +30,8 @@ def process_notes(files, progress_callback=None, status_callback=None):
         df["date"] = note.date
         df["broker"] = broker
 
+        diff = validate_note(df, note)
+        
         if status_callback:
         
             assets = sorted(df["asset"].unique())
@@ -58,7 +60,20 @@ def process_notes(files, progress_callback=None, status_callback=None):
         """
             )
 
+        if status_callback:
         
+            if diff > 1:
+        
+                status_callback(
+                    f"❌ **Validação falhou** — diferença: R$ {diff:.2f}"
+                )
+        
+            else:
+        
+                status_callback(
+                    "✅ **Validação financeira OK**"
+                )
+                
         all_results.append(df)
 
         if progress_callback:
