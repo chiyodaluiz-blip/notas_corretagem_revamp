@@ -4,7 +4,7 @@ from datetime import datetime
 import pdfplumber
 
 from core.models import Trade, Taxes, BrokerageNote
-from utils.regex_patterns import DATE_REGEX, TAX_REGEX
+from utils.regex_patterns import DATE_REGEX, TAX_REGEX, IRRF_REGEX, LIQUIDO_REGEX
 
 
 def parse_number(x):
