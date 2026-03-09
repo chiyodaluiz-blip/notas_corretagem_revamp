@@ -175,7 +175,7 @@ class B3Parser:
     
         for line in text.split("\n"):
     
-            if "Liqu" in line:
+            if "Líqu" in line:
     
                 nums = re.findall(r"-?\d+[\.,]\d+", line)
     
