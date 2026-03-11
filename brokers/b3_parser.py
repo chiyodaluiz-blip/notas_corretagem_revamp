@@ -174,7 +174,21 @@ class B3Parser:
     
     def extract_liquido(self, text):
 
-        # Pattern: "Líquido para DD/MM/YYYY" followed by a number and optional D/C
+        def undouble(s):
+            """Remove duplicated chars produced by some PDF extractions.
+            'LLííqquuiiddoo' -> 'Líquido', '2200..001122,,3377' -> '20.012,37'"""
+            result = []
+            i = 0
+            while i < len(s):
+                result.append(s[i])
+                # skip next char if it's the same (doubled)
+                if i + 1 < len(s) and s[i] == s[i + 1]:
+                    i += 2
+                else:
+                    i += 1
+            return "".join(result)
+
+        # ---- Strategy 1: match normal text ----
         m = re.search(
             r"L[ií]quido\s+para\s+\d{2}/\d{2}/\d{4}\s+(-?[\d.,]+)\s*([DC])?",
             text,
@@ -187,27 +201,44 @@ class B3Parser:
                 val = -abs(val)
             return val
 
-        # Fallback: scan line by line
+        # ---- Strategy 2: match doubled text (e.g. NuInvest PDFs) ----
+        # Pattern for doubled: "LLííqquuiiddoo ppaarraa DDDD//MMMM//YYYYYYYYYYY  value"
+        m = re.search(
+            r"LL[íi][íi]qquuiiddoo\s+ppaarraa\s+\S+\s+([\d.,]+)",
+            text,
+            re.IGNORECASE
+        )
+        if m:
+            raw = m.group(1)
+            val = parse_number(undouble(raw))
+            return val
+
+        # ---- Strategy 3: line-by-line fallback ----
         lines = text.split("\n")
         for i, line in enumerate(lines):
-            if re.search(r"L[ií]quido\s+para", line, re.IGNORECASE):
-                # Value may be at end of same line
+            # Check both normal and doubled variants
+            if re.search(r"L[ií]quido\s+para", line, re.IGNORECASE) or \
+               re.search(r"LL[íi][íi]qquuiiddoo\s+ppaarraa", line, re.IGNORECASE):
+                # Try to get the last number-like token on the line
                 nums = re.findall(r"(-?[\d]+[.,][\d]+)", line)
-                dc = re.findall(r"\b([DC])\s*$", line.strip())
                 if nums:
-                    val = parse_number(nums[-1])
-                    if dc and dc[-1].upper() == "D":
-                        val = -abs(val)
+                    raw = nums[-1]
+                    # Detect if value is doubled (e.g. "2200..001122,,3377")
+                    if ".." in raw or ",," in raw:
+                        val = parse_number(undouble(raw))
+                    else:
+                        val = parse_number(raw)
                     return val
                 # Try next line
                 if i + 1 < len(lines):
                     next_line = lines[i + 1].strip()
                     nums = re.findall(r"(-?[\d]+[.,][\d]+)", next_line)
-                    dc = re.findall(r"\b([DC])\s*$", next_line)
                     if nums:
-                        val = parse_number(nums[-1])
-                        if dc and dc[-1].upper() == "D":
-                            val = -abs(val)
+                        raw = nums[-1]
+                        if ".." in raw or ",," in raw:
+                            val = parse_number(undouble(raw))
+                        else:
+                            val = parse_number(raw)
                         return val
 
         return None
