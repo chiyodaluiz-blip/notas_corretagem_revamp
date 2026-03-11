@@ -121,10 +121,10 @@ class B3Parser:
     
                 setattr(taxes, name, val)
     
-        # IRRF sobre operações
+        # IRRF sobre operações (flat tax, not pro-rated)
         irrf = self.extract_irrf(text)
     
-        taxes.impostos = irrf
+        taxes.irrf = irrf
     
         taxes.total = (
             taxes.liquidacao
@@ -132,6 +132,7 @@ class B3Parser:
             + taxes.emolumentos
             + taxes.operacional
             + taxes.impostos
+            + taxes.irrf
         )
     
         return taxes
