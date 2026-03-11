@@ -12,7 +12,7 @@ def parse_number(x):
     x = x.replace(".", "")
     x = x.replace(",", ".")
 
-    return float(x)
+    return float(x)  # raises ValueError if not a number
 
 
 class B3Parser:
@@ -78,29 +78,49 @@ class B3Parser:
 
             try:
 
-                side = tokens[1]
-                asset = tokens[3]
+                side = tokens[1]  # C or V
 
-                numbers = []
+                # Asset name can span multiple tokens between side/market-type and the numeric columns.
+                # Strategy: walk from the right to find the numeric tail (total, price, qty, ...),
+                # then the asset is everything between the fixed left tokens and the numeric block.
 
-                for t in tokens:
-
+                # Find all numeric tokens from the right
+                numeric_from_right = []
+                for t in reversed(tokens):
                     try:
-                        numbers.append(parse_number(t))
-                    except:
-                        pass
+                        numeric_from_right.append(parse_number(t))
+                    except ValueError:
+                        break
 
-                if len(numbers) < 2:
+                numeric_from_right.reverse()
+
+                # Typical line has 3 nums at the end: qty, price, total
+                # Some have 4: qty, price, total, D/C-adjustment
+                if len(numeric_from_right) < 3:
                     continue
 
-                qty = numbers[0]
-                price = numbers[1]
+                # Last value is the total (qty * price), second-to-last is price, third-to-last is qty
+                qty = numeric_from_right[-3]
+                price = numeric_from_right[-2]
+
+                # Asset: tokens between position 2..3 (after side + market type) and the first numeric token
+                num_count = len(numeric_from_right)
+                asset_tokens = tokens[2 : len(tokens) - num_count]
+
+                # Remove common non-asset tokens like "VISTA", "FRACIONARIO", "#"
+                skip = {"VISTA", "FRACIONARIO", "FRAC", "TERMO", "#", "ON", "PN", "UNT", "CI", "ER", "ED"}
+                asset_parts = [t for t in asset_tokens if t.upper() not in skip]
+
+                asset = " ".join(asset_parts) if asset_parts else tokens[3]
+
+                if qty <= 0 or price <= 0:
+                    continue
 
                 trades.append(
                     Trade(asset, side, qty, price)
                 )
 
-            except:
+            except Exception:
                 continue
 
         return trades
@@ -174,27 +194,40 @@ class B3Parser:
     
     def extract_liquido(self, text):
 
-        # Try multiline regex first (handles value on same or next line)
+        # Pattern: "Líquido para DD/MM/YYYY" followed by a number and optional D/C
         m = re.search(
-            r"L[ií]quido\s+para\s+\d{2}/\d{2}/\d{4}\s+(-?[\d.,]+)",
+            r"L[ií]quido\s+para\s+\d{2}/\d{2}/\d{4}\s+(-?[\d.,]+)\s*([DC])?",
             text,
             re.IGNORECASE
         )
         if m:
-            return parse_number(m.group(1))
+            val = parse_number(m.group(1))
+            sign = m.group(2)
+            if sign and sign.upper() == "D":
+                val = -abs(val)
+            return val
 
         # Fallback: scan line by line
         lines = text.split("\n")
         for i, line in enumerate(lines):
             if re.search(r"L[ií]quido\s+para", line, re.IGNORECASE):
-                # Value may be at end of same line or start of next
-                nums = re.findall(r"-?[\d]+[.,][\d]+", line)
+                # Value may be at end of same line
+                nums = re.findall(r"(-?[\d]+[.,][\d]+)", line)
+                dc = re.findall(r"\b([DC])\s*$", line.strip())
                 if nums:
-                    return parse_number(nums[-1])
+                    val = parse_number(nums[-1])
+                    if dc and dc[-1].upper() == "D":
+                        val = -abs(val)
+                    return val
                 # Try next line
                 if i + 1 < len(lines):
-                    nums = re.findall(r"-?[\d]+[.,][\d]+", lines[i + 1])
+                    next_line = lines[i + 1].strip()
+                    nums = re.findall(r"(-?[\d]+[.,][\d]+)", next_line)
+                    dc = re.findall(r"\b([DC])\s*$", next_line)
                     if nums:
-                        return parse_number(nums[-1])
+                        val = parse_number(nums[-1])
+                        if dc and dc[-1].upper() == "D":
+                            val = -abs(val)
+                        return val
 
         return None
