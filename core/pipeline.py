@@ -62,7 +62,7 @@ def process_notes(files, progress_callback=None, status_callback=None):
 
         if status_callback:
         
-            if diff > 1:
+            if diff is not None and diff > 1:
         
                 status_callback(
                     f"❌ **Validação falhou** — diferença: R$ {diff:.2f}"
