@@ -46,17 +46,17 @@ def process_notes(files, progress_callback=None, status_callback=None):
                 f"""
         📄 **Arquivo:** {f}
         
-        \t📅 **Data:** {note.date}
+        📅 **Data:** {note.date}
         
-        \t🏦 **Corretora:** {broker}
+        🏦 **Corretora:** {broker}
         
-        \t📊 **Trades:** {total_trades}
+        📊 **Trades:** {total_trades}
         
-        \t📈 **Ativos:** {", ".join(assets)}
+        📈 **Ativos:** {", ".join(assets)}
         
-        \t💰 **Valor bruto negociado:** R$ {total_valor:,.2f}
+        💰 **Valor bruto negociado:** R$ {total_valor:,.2f}
         
-        \t🧾 **Total taxas:** R$ {total_fees:,.2f}
+        🧾 **Total taxas:** R$ {total_fees:,.2f}
         """
             )
 
@@ -65,13 +65,13 @@ def process_notes(files, progress_callback=None, status_callback=None):
             if diff is not None and diff > 1:
         
                 status_callback(
-                    f"\t❌ **Validação falhou** — diferença: R$ {diff:.2f}"
+                    f"❌ **Validação falhou** — diferença: R$ {diff:.2f}"
                 )
         
             else:
         
                 status_callback(
-                    "\t✅ **Validação financeira OK**"
+                    "✅ **Validação financeira OK**"
                 )
                 
         all_results.append(df)
