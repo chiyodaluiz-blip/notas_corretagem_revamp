@@ -44,7 +44,7 @@ def process_notes(files, progress_callback=None, status_callback=None):
         
             status_callback(
                 f"""
-        📄 **Arquivo:** {f}
+        \t📄 **Arquivo:** {f}
         
         \t📅 **Data:** {note.date}
         
