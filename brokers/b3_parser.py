@@ -50,10 +50,13 @@ class B3Parser:
 
         date = self.extract_date(text)
 
+        liquido = self.extract_liquido(text)
+
         return BrokerageNote(
             date=date,
             trades=trades,
-            taxes=taxes
+            taxes=taxes,
+            liquido_para=liquido
         )
 
 
@@ -170,18 +173,28 @@ class B3Parser:
         
     
     def extract_liquido(self, text):
-    
-        import re
-    
-        for line in text.split("\n"):
-            
-            if "Líqu" in l:
-                print("DEBUG:", l)
-            if "Líqu" in line:
-    
-                nums = re.findall(r"-?\d+[\.,]\d+", line)
-    
+
+        # Try multiline regex first (handles value on same or next line)
+        m = re.search(
+            r"L[ií]quido\s+para\s+\d{2}/\d{2}/\d{4}\s+(-?[\d.,]+)",
+            text,
+            re.IGNORECASE
+        )
+        if m:
+            return parse_number(m.group(1))
+
+        # Fallback: scan line by line
+        lines = text.split("\n")
+        for i, line in enumerate(lines):
+            if re.search(r"L[ií]quido\s+para", line, re.IGNORECASE):
+                # Value may be at end of same line or start of next
+                nums = re.findall(r"-?[\d]+[.,][\d]+", line)
                 if nums:
                     return parse_number(nums[-1])
-    
+                # Try next line
+                if i + 1 < len(lines):
+                    nums = re.findall(r"-?[\d]+[.,][\d]+", lines[i + 1])
+                    if nums:
+                        return parse_number(nums[-1])
+
         return None
