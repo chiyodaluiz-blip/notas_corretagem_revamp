@@ -42,6 +42,10 @@ def apply_pro_rata(note):
         df["valor"] - df["fees"]
     )
 
+    # Signed version: buys are negative (debit), sells are positive (credit)
+    df["valor_pago_sign"] = df["valor_pago"]
+    df.loc[df["side"] == "C", "valor_pago_sign"] = df.loc[df["side"] == "C", "valor_pago_sign"] * -1
+
     return df
 
 def validate_note(df, note):
@@ -49,7 +53,7 @@ def validate_note(df, note):
     if note.liquido_para is None:
         return None
 
-    valor_calculado = df["valor_pago"].sum()
+    valor_calculado = df["valor_pago_sign"].sum()
 
     diff = abs(abs(note.liquido_para) - abs(valor_calculado))
 
