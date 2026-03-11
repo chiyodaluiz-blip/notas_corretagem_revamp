@@ -53,7 +53,12 @@ def validate_note(df, note):
     if note.liquido_para is None:
         return None
 
+    # Sum of signed trade values (sells positive, buys negative)
     valor_calculado = df["valor_pago_sign"].sum()
+
+    # IRRF is a flat deduction not pro-rated into trades,
+    # so subtract it from the calculated value
+    valor_calculado = valor_calculado - note.taxes.irrf
 
     diff = abs(abs(note.liquido_para) - abs(valor_calculado))
 
