@@ -11,7 +11,7 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("📄 Processador de Notas de Corretagem aabbbaa")
+st.title("📄 Processador de Notas de Corretagem")
 
 uploaded = st.file_uploader(
     "Upload das notas",
