@@ -19,6 +19,7 @@ class Taxes:
     emolumentos: float = 0
     operacional: float = 0
     impostos: float = 0
+    irrf: float = 0
     total: float = 0
 
 
