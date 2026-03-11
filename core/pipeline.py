@@ -44,20 +44,22 @@ def process_notes(files, progress_callback=None, status_callback=None):
         
             status_callback(
                 f"""
-        📄 **Arquivo:** {f}
-        
-        📅 **Data:** {note.date}
-        
-        🏦 **Corretora:** {broker}
-        
-        📊 **Trades:** {total_trades}
-        
-        📈 **Ativos:** {", ".join(assets)}
-        
-        💰 **Valor bruto negociado:** R$ {total_valor:,.2f}
-        
-        🧾 **Total taxas:** R$ {total_fees:,.2f}
-        """
+---
+
+📄 **Arquivo:** {f}
+
+📅 **Data:** {note.date}
+
+🏦 **Corretora:** {broker}
+
+📊 **Trades:** {total_trades}
+
+📈 **Ativos:** {", ".join(assets)}
+
+💰 **Valor bruto negociado:** R$ {total_valor:,.2f}
+
+🧾 **Total taxas:** R$ {total_fees:,.2f}
+"""
             )
 
         if status_callback:
