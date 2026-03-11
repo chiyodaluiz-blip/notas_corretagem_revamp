@@ -164,7 +164,7 @@ class B3Parser:
 
     def extract_irrf(self, text):
     
-        m = re.search(IRRF_REGEX, text)
+        m = re.search(IRRF_REGEX, text, re.MULTILINE)
     
         if m:
             return abs(parse_number(m.group(1)))
