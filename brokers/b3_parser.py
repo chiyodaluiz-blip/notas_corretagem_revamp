@@ -12,7 +12,7 @@ def parse_number(x):
     x = x.replace(".", "")
     x = x.replace(",", ".")
 
-    return float(x)  # raises ValueError if not a number
+    return float(x)
 
 
 class B3Parser:
@@ -78,49 +78,29 @@ class B3Parser:
 
             try:
 
-                side = tokens[1]  # C or V
+                side = tokens[1]
+                asset = tokens[3]
 
-                # Asset name can span multiple tokens between side/market-type and the numeric columns.
-                # Strategy: walk from the right to find the numeric tail (total, price, qty, ...),
-                # then the asset is everything between the fixed left tokens and the numeric block.
+                numbers = []
 
-                # Find all numeric tokens from the right
-                numeric_from_right = []
-                for t in reversed(tokens):
+                for t in tokens:
+
                     try:
-                        numeric_from_right.append(parse_number(t))
-                    except ValueError:
-                        break
+                        numbers.append(parse_number(t))
+                    except:
+                        pass
 
-                numeric_from_right.reverse()
-
-                # Typical line has 3 nums at the end: qty, price, total
-                # Some have 4: qty, price, total, D/C-adjustment
-                if len(numeric_from_right) < 3:
+                if len(numbers) < 2:
                     continue
 
-                # Last value is the total (qty * price), second-to-last is price, third-to-last is qty
-                qty = numeric_from_right[-3]
-                price = numeric_from_right[-2]
-
-                # Asset: tokens between position 2..3 (after side + market type) and the first numeric token
-                num_count = len(numeric_from_right)
-                asset_tokens = tokens[2 : len(tokens) - num_count]
-
-                # Remove common non-asset tokens like "VISTA", "FRACIONARIO", "#"
-                skip = {"VISTA", "FRACIONARIO", "FRAC", "TERMO", "#", "ON", "PN", "UNT", "CI", "ER", "ED"}
-                asset_parts = [t for t in asset_tokens if t.upper() not in skip]
-
-                asset = " ".join(asset_parts) if asset_parts else tokens[3]
-
-                if qty <= 0 or price <= 0:
-                    continue
+                qty = numbers[0]
+                price = numbers[1]
 
                 trades.append(
                     Trade(asset, side, qty, price)
                 )
 
-            except Exception:
+            except:
                 continue
 
         return trades
