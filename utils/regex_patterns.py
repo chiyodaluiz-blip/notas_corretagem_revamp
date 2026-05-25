@@ -6,7 +6,7 @@ LIQUIDO_REGEX = r"L[ií]quido\s+para.*?(-?[\d.,]+)"
 
 TAX_REGEX = {
 
-"liquidacao": r"Taxa de Liquidação\s+(-?[\d.,]+)",
+"liquidacao": r"Taxa de Liquidação/CCP\s+(-?[\d.,]+)",
 "registro": r"Taxa de Registro\s+(-?[\d.,]+)",
 "emolumentos": r"Emolumentos\s+(-?[\d.,]+)",
 "operacional": r"Corretagem\s+(-?[\d.,]+)",
